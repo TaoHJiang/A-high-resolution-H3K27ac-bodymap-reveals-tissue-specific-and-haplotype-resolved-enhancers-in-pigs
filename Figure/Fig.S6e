@@ -1,0 +1,17 @@
+result=read.table("GO_enrich_filter.txt",head=T)
+pdf(file="E-P_pair_gene_function.pdf",width=22,height=10)
+  ggbarplot(data, x = "Term", y = "Value",
+                fill = "Group", # change fill color by cyl
+                color = "white", # Set bar border colors to white
+                #palette = c("blue", "red","purple"),#see ?ggpar
+                sort.val = "asc", # Sort the value in ascending order
+                sort.by.Term = TRUE,# Sort inside each group
+                x.text.angle = 90, # Rotate vertically x axis texts
+				rotate=T,
+				palette=c("#B75A21","#7AAFD7"),
+				ylab="-log10(P-value)",
+				xlab="")+theme(legend.title=element_blank()) +font("x.text", size = 15)+ font("y.text", size = 15)+ 
+				font("legend.text", size = 15)+ font("axis.title", size = 15)+scale_y_continuous(expand=c(0, 0))
+
+dev.off()
+
