@@ -1,0 +1,48 @@
+library(networkD3)
+library(tidyverse)
+
+setwd("G:\\2024H3K27ac流程\\co_activity")
+
+pair=read.table("tissue_specific_enhancer_pair.txt2")
+pair$V1 = gsub("Other","Other_enh",pair$V1)
+pair$V2 = gsub("Other","Other_pro",pair$V2)
+MisNodes = as.data.frame(unique(c(pair$V1,pair$V2)))
+colnames(MisNodes)="name"
+
+MisNodes$group_color=c("#4A6FE3","#95A2E2","#B5BBE3","#D33F6A","#E38D9E","#E6AFB9")
+
+MisLinks =pair
+colnames(MisLinks)=c("source","target","value")
+MisLinks$group_color2="grey"
+
+
+Node2index = list()
+Node2index[MisNodes$name] = 0:(length(MisNodes$name)-1)
+MisLinks = MisLinks %>%
+  mutate(source2 = unlist(Node2index[source])) %>%
+  mutate(target2 = unlist(Node2index[target]))
+
+# 定义颜色
+color2project = paste(c(unique(MisNodes$group_color),unique(MisLinks$group_color2)),collapse = '","')
+my_color <- paste0('d3.scaleOrdinal().domain(["',color2project,'"]).range(["',color2project,'"])')
+
+
+
+# 绘图
+p <- sankeyNetwork(Links = MisLinks, 
+              Nodes = MisNodes,
+              Source = "source2", 
+              Target = "target2",
+              Value ="value",
+              NodeID = "name",
+              NodeGroup = "group_color", 
+              LinkGroup  = "group_color2", 
+              colourScale = JS(my_color),
+              fontSize = 10
+)
+p
+
+
+saveNetwork(p,"enhancer_pair_Sankey.html", selfcontained = F)
+library(webshot)
+webshot("enhancer_pair_Sankey.html","enhancer_pair_Sankey.pdf",vwidth = 1700,vheight=700)

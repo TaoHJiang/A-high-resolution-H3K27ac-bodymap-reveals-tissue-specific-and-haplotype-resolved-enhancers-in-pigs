@@ -1,0 +1,37 @@
+enh=read.table("1Ref_all_peaks_merge_enhancer_homer_summary.txt")
+enh$V1=(enh$V1/448648)*100
+
+dat2=read.table("H3K27ac_enhancer_peak_other_annotate.txt")
+dat2$V2=gsub("H3K27ac_enhancer_overlap_total_","",dat2$V2)
+dat2$V2=gsub("H3K27ac_enhancer_overlap_","",dat2$V2)
+dat2$V2=gsub(".bed","",dat2$V2)
+
+dat2$V2=c("DNA","LINE","LTR","SINE","CpG_Island","CpG_Shelf","CpG_Shore")
+dat2$V1=(dat2$V1/448648)*100
+
+
+data=rbind(enh,dat2)
+data$Group=rep(c("genome_annotation","TE_annotation","CPG_island"),times=c(4,4,3))
+
+data2=data[order(data$Group,data$V1,decreasing=T),]
+
+
+data2$V2 <- factor(data2$V2,levels =c('intron','Intergenic','exon','TTS','LINE','SINE','LTR','DNA','CpG_Shelf','CpG_Shore','CpG_Island'))
+
+
+library(ggplot2)
+pdf("H3K27ac_enhancer_peak_annotation.pdf",width=3.4,height=3)
+ggplot(data2, aes(x=V2, y=V1, fill=Group)) +  geom_bar(stat="identity", position=position_dodge(),width = 0.7)+scale_fill_brewer(palette = "Set1")+
+ theme_bw()+ scale_y_continuous(expand=c(0,0)) +
+xlab("")+ylab("Percentage (%)")+
+ theme(legend.text=element_text(colour="black", size=9),panel.border=element_blank(),legend.position=c(0.8,0.85),legend.title = element_blank(),
+  panel.grid.major.x = element_blank(),
+         panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+ panel.grid.major.y = element_blank(),
+ axis.line=element_line(color="black"),
+ axis.text.x = element_text(angle=90,vjust=0.5,colour="black",size=12),
+         axis.title.x=element_text(colour="black", size=13),
+         axis.text.y = element_text(vjust=0.5,colour="black",size=12),
+         axis.title.y=element_text(colour="black", size=13))
+ dev.off()
